@@ -56,17 +56,12 @@ class Installer implements InstallerInterface
             echo 'getenv("APP_ENV") !== "dev" It has did nothing';
             exit;
         }
-        try{
-            $publicDir = $this->projectDir . DIRECTORY_SEPARATOR . 'public';
+        $publicDir = $this->projectDir . DIRECTORY_SEPARATOR . 'public';
+        if(file_exists($publicDir . DIRECTORY_SEPARATOR . 'csv-storage' . DIRECTORY_SEPARATOR . 'logs.csv')){
             unlink($publicDir . DIRECTORY_SEPARATOR . 'csv-storage' . DIRECTORY_SEPARATOR . 'logs.csv');
-        } catch (\Exception $e){
-            echo $e->getMessage() . "\n";
         }
-        try{
-            $publicDir = $this->projectDir . DIRECTORY_SEPARATOR . 'public';
+        if(is_dir($publicDir . DIRECTORY_SEPARATOR . 'csv-storage')){
             rmdir($publicDir . DIRECTORY_SEPARATOR . 'csv-storage');
-        } catch (\Exception $e){
-            echo $e->getMessage() . "\n";
         }
     }
 
