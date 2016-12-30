@@ -34,7 +34,7 @@ return [
         ],
         'aliases' => [
             EavAbstractFactory::DB_SERVICE_NAME => getenv('APP_ENV') === 'prod' ? 'db' : 'db',
-            'logDataStore' => 'memLogDs'
+            'logDataStore' => 'testCsvIntIdDS'
         ]
     ],
 
@@ -42,17 +42,14 @@ return [
         'testCsvIntIdDS' => [
             'class' => zaboy\rest\DataStore\CsvBase::class ,
             'filename' => __DIR__ . DIRECTORY_SEPARATOR . ".." .
-                DIRECTORY_SEPARATOR . "..".DIRECTORY_SEPARATOR . "data" .
+                DIRECTORY_SEPARATOR . "..".DIRECTORY_SEPARATOR . "public" .
                 DIRECTORY_SEPARATOR . "csv-storage" . DIRECTORY_SEPARATOR . 'logs.csv',
             'delimiter' => ';',
         ],
         'httpLogDS' => [
             'class' => zaboy\rest\DataStore\HttpClient::class,
-            'url' => 'http://localhost:8080/api/rest/testCsvIntIdDS',
+            'url' => 'http://localhost:9090/api/rest/testCsvIntIdDS',
             'options' => ['timeout' => 30]
         ],
-        'memLogDs' => [
-            'class' => zaboy\rest\DataStore\Memory::class,
-        ]
     ]
 ];

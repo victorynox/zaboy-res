@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\Test\LoggerInterfaceTest;
 use Xiag\Rql\Parser\Query;
-use zaboy\res\Di\InsideConstruct;
+use zaboy\dic\InsideConstruct;
 use zaboy\res\Logger\LoggerDS;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 

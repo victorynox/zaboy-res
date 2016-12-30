@@ -12,7 +12,7 @@ namespace zaboy\res\Logger;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
-use zaboy\res\Di\InsideConstruct;
+use zaboy\dic\InsideConstruct;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 
 class LoggerDS extends AbstractLogger
