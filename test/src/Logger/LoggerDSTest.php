@@ -5,9 +5,7 @@
  * Date: 19.12.16
  * Time: 11:43 AM
  */
-
 namespace zaboy\test\res\Logger;
-
 
 use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -15,6 +13,7 @@ use Psr\Log\LogLevel;
 use Psr\Log\Test\LoggerInterfaceTest;
 use Xiag\Rql\Parser\Query;
 use zaboy\dic\InsideConstruct;
+use zaboy\res\Logger\Logger;
 use zaboy\res\Logger\LoggerDS;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 
@@ -26,17 +25,9 @@ class LoggerDSTest extends LoggerInterfaceTest
     /** @var  ContainerInterface */
     protected $container;
 
-    /** @var  DataStoresInterface */
-    protected $dataStore;
-
     public function setUp()
     {
-        $container = include './config/container.php';
-        $this->container = $container;
-        InsideConstruct::setContainer($this->container);
-
-        $this->dataStore = $this->container->has('logDataStore') ? $this->container->get('logDataStore') : null;
-        $this->dataStore->deleteAll();
+        $this->object = $this->getLogger();
     }
 
     /**
@@ -44,16 +35,26 @@ class LoggerDSTest extends LoggerInterfaceTest
      * @param $dateTime
      * @param $expectedTime
      */
-    public function testLog_withTime($dateTime, $expectedTime)
+    public function testLogWithTime($dateTime, $expectedTime)
     {
-        $this->object = $this->getLogger();
-        $this->object->log(LogLevel::ERROR,
+        $this->object->log(
+            LogLevel::ERROR,
             $dateTime . "|" . "Error message of level emergency with context: {user}",
-            ['user' => 'Bob']);
+            ['user' => 'Bob']
+        );
         $expected = [
             $expectedTime . ' ' . LogLevel::ERROR . ' ' .
             'Error message of level emergency with context: Bob'
         ];
+        $this->assertEquals($expected, $this->getLogsWithTime());
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return new Logger(fopen(realpath("logs.txt"), "w"));
     }
 
     public function provideLogDateTime()
@@ -67,14 +68,6 @@ class LoggerDSTest extends LoggerInterfaceTest
     }
 
     /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return new LoggerDS();
-    }
-
-    /**
      * This must return the log messages in order.
      *
      * The simple formatting of the messages is: "<LOG LEVEL> <MESSAGE>".
@@ -85,20 +78,29 @@ class LoggerDSTest extends LoggerInterfaceTest
      */
     public function getLogs()
     {
+        $file = fopen(realpath("logs.txt"), "w");
+
         $logs = [];
-        $data = $this->dataStore->query(new Query());
+        while (($log = fgets($file))) {
+            $part = explode(';', $log);
+            $logs[] = $part[1] . ' ' . $part[2];
+        }
+        return $logs;
+        /*$data = $this->dataStore->query(new Query());
         foreach ($data as $item) {
             $logs[] = $item['level'] . " " . $item['message'];
         }
-        return $logs;
+        return $logs;*/
     }
 
     public function getLogsWithTime()
     {
+        $file = fopen(realpath("logs.txt"), "w");
+
         $logs = [];
-        $data = $this->dataStore->query(new Query());
-        foreach ($data as $item) {
-            $logs[] = $item['time'] . " " . $item['level'] . " " . $item['message'];
+        while (($log = fgets($file))) {
+            $part = explode(';', $log);
+            $logs[] = $part[0] . ' ' . $part[1] . ' ' . $part[2];
         }
         return $logs;
     }

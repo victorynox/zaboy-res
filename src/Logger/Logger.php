@@ -1,21 +1,22 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: victorsecuring
- * Date: 17.12.16
- * Time: 10:23 AM
+ * User: root
+ * Date: 09.01.17
+ * Time: 18:32
  */
 
 namespace zaboy\res\Logger;
 
+use InvalidArgumentException;
 use Psr\Log\AbstractLogger;
-use Psr\Log\InvalidArgumentException;
-use Psr\Log\LogLevel;
-use zaboy\dic\InsideConstruct;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 
-class LoggerDS extends AbstractLogger
+class Logger extends AbstractLogger
 {
+    protected $file;
+
+    protected $delimiter;
+    protected $endString;
 
     protected $levelEnum = [
         'emergency',
@@ -28,12 +29,10 @@ class LoggerDS extends AbstractLogger
         'debug'
     ];
 
-    /** @var  DataStoresInterface */
-    protected $logDataStore;
-
-    public function __construct(DataStoresInterface $logDataStore = null)
+    public function __construct($file = STDOUT, $delimiter = ';', $endString = "\n")
     {
-        InsideConstruct::initMyServices();
+        $this->file = $file;
+        $this->delimiter = $delimiter;
     }
 
     /**
@@ -47,7 +46,6 @@ class LoggerDS extends AbstractLogger
      */
     public function log($level, $message, array $context = array())
     {
-
         $replace = [];
         if (!in_array($level, $this->levelEnum)) {
             throw new InvalidArgumentException("Invalid Level");
@@ -66,11 +64,18 @@ class LoggerDS extends AbstractLogger
             $id = microtime(true) - date('Z');
             $message = $split[0];
         }
+        $id = base64_encode(uniqid("", true) .'_'. $id);
 
-        $this->logDataStore->create([
-            'id' =>  base64_encode(uniqid("", true) .'_'. $id),
-            'level' => $level,
-            'message' => $message
-        ]);
+        $string = $id . $this->delimiter . $level . $this->delimiter . $message . $this->endString;
+        fwrite($this->file, $string, strlen($string));
     }
+
+    /**
+     * Close file descriptor
+     */
+    public function __destruct()
+    {
+        fclose($this->file);
+    }
+
 }
