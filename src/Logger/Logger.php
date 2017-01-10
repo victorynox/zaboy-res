@@ -8,15 +8,13 @@
 
 namespace zaboy\res\Logger;
 
-use InvalidArgumentException;
 use Psr\Log\AbstractLogger;
+use Psr\Log\InvalidArgumentException;
+use zaboy\dic\InsideConstruct;
 
 class Logger extends AbstractLogger
 {
-    protected $file;
-
-    protected $delimiter;
-    protected $endString;
+    protected $logWriter;
 
     protected $levelEnum = [
         'emergency',
@@ -29,10 +27,12 @@ class Logger extends AbstractLogger
         'debug'
     ];
 
-    public function __construct($file = STDOUT, $delimiter = ';', $endString = "\n")
+    public function __construct(LogWriter $logWriter = null)
     {
-        $this->file = $file;
-        $this->delimiter = $delimiter;
+        InsideConstruct::initMyServices();
+        if (!isset($this->logWriter)) {
+            $this->logWriter = new FileLogWriter();
+        }
     }
 
     /**
@@ -64,18 +64,7 @@ class Logger extends AbstractLogger
             $id = microtime(true) - date('Z');
             $message = $split[0];
         }
-        $id = base64_encode(uniqid("", true) .'_'. $id);
-
-        $string = $id . $this->delimiter . $level . $this->delimiter . $message . $this->endString;
-        fwrite($this->file, $string, strlen($string));
+        $id = base64_encode(uniqid("", true) . '_' . $id);
+        $this->logWriter->logWrite($id, $level, $message);
     }
-
-    /**
-     * Close file descriptor
-     */
-    public function __destruct()
-    {
-        fclose($this->file);
-    }
-
 }

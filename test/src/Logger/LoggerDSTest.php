@@ -11,11 +11,10 @@ use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\Test\LoggerInterfaceTest;
-use Xiag\Rql\Parser\Query;
 use zaboy\dic\InsideConstruct;
+use zaboy\res\Logger\FileLogWriter;
+use zaboy\res\Logger\FileLogWriterFactory;
 use zaboy\res\Logger\Logger;
-use zaboy\res\Logger\LoggerDS;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 
 class LoggerDSTest extends LoggerInterfaceTest
 {
@@ -25,9 +24,16 @@ class LoggerDSTest extends LoggerInterfaceTest
     /** @var  ContainerInterface */
     protected $container;
 
+    protected $file;
+
     public function setUp()
     {
+        $this->container = include 'config/container.php';
+        InsideConstruct::setContainer($this->container);
         $this->object = $this->getLogger();
+        $config = $this->container->get('config');
+        $this->file = $config['logWriter'][FileLogWriter::class][FileLogWriterFactory::FILE_NAME_KEY];
+        fopen($this->file, "w");
     }
 
     /**
@@ -54,7 +60,7 @@ class LoggerDSTest extends LoggerInterfaceTest
      */
     public function getLogger()
     {
-        return new Logger(fopen(realpath("logs.txt"), "w"));
+        return new Logger();
     }
 
     public function provideLogDateTime()
@@ -78,29 +84,22 @@ class LoggerDSTest extends LoggerInterfaceTest
      */
     public function getLogs()
     {
-        $file = fopen(realpath("logs.txt"), "w");
-
         $logs = [];
-        while (($log = fgets($file))) {
+        $logsString = array_diff(explode("\n", file_get_contents($this->file)), [""]);
+        foreach ($logsString as $log) {
             $part = explode(';', $log);
             $logs[] = $part[1] . ' ' . $part[2];
         }
         return $logs;
-        /*$data = $this->dataStore->query(new Query());
-        foreach ($data as $item) {
-            $logs[] = $item['level'] . " " . $item['message'];
-        }
-        return $logs;*/
     }
 
     public function getLogsWithTime()
     {
-        $file = fopen(realpath("logs.txt"), "w");
-
         $logs = [];
-        while (($log = fgets($file))) {
+        $logsString = array_diff(explode("\n", file_get_contents($this->file)), [""]);
+        foreach ($logsString as $log) {
             $part = explode(';', $log);
-            $logs[] = $part[0] . ' ' . $part[1] . ' ' . $part[2];
+            $logs[] = explode('_', base64_decode($part[0]))[1] . ' ' . $part[1] . ' ' . $part[2];
         }
         return $logs;
     }
