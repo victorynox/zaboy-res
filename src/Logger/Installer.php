@@ -8,61 +8,25 @@
 
 namespace zaboy\res\Logger;
 
-
+use Composer\IO\IOInterface;
 use Interop\Container\ContainerInterface;
+use zaboy\installer\Command;
 use zaboy\installer\Install\InstallerInterface;
 
 class Installer implements InstallerInterface
 {
+    const LOGS_DIR = 'logs';
+    protected $ioComposer;
+    const LOGS_FILE = 'logs.txt';
 
-    protected $projectDir;
     /**
      * Installer constructor.
      * @param ContainerInterface $container
+     * @param IOInterface $ioComposer
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, IOInterface $ioComposer)
     {
-        $this->projectDir = realpath(__DIR__ . DIRECTORY_SEPARATOR .'..' . DIRECTORY_SEPARATOR . '..');
-
-
-    }
-
-    /**
-     * install
-     * @return void
-     */
-    public function install()
-    {
-        if (getenv('APP_ENV') !== 'dev') {
-            echo 'getenv("APP_ENV") !== "dev" It has did nothing';
-            exit;
-        }
-        $logCsv = $this->projectDir . DIRECTORY_SEPARATOR .
-            'data' . DIRECTORY_SEPARATOR .
-            'csv-storage' . DIRECTORY_SEPARATOR .
-            'logs.csv';
-        $publicDir = $this->projectDir . DIRECTORY_SEPARATOR . 'public';
-        mkdir($publicDir . DIRECTORY_SEPARATOR . 'csv-storage');
-        copy($logCsv, $publicDir . DIRECTORY_SEPARATOR . 'csv-storage' . DIRECTORY_SEPARATOR . 'logs.csv');
-    }
-
-    /**
-     * Clean all installation
-     * @return void
-     */
-    public function uninstall()
-    {
-        if (getenv('APP_ENV') !== 'dev') {
-            echo 'getenv("APP_ENV") !== "dev" It has did nothing';
-            exit;
-        }
-        $publicDir = $this->projectDir . DIRECTORY_SEPARATOR . 'public';
-        if(file_exists($publicDir . DIRECTORY_SEPARATOR . 'csv-storage' . DIRECTORY_SEPARATOR . 'logs.csv')){
-            unlink($publicDir . DIRECTORY_SEPARATOR . 'csv-storage' . DIRECTORY_SEPARATOR . 'logs.csv');
-        }
-        if(is_dir($publicDir . DIRECTORY_SEPARATOR . 'csv-storage')){
-            rmdir($publicDir . DIRECTORY_SEPARATOR . 'csv-storage');
-        }
+        $this->ioComposer = $ioComposer;
     }
 
     /**
@@ -73,5 +37,39 @@ class Installer implements InstallerInterface
     {
         $this->uninstall();
         $this->install();
+    }
+
+    /**
+     * Clean all installation
+     * @return void
+     */
+    public function uninstall()
+    {
+        if (constant('APP_ENV') !== 'dev') {
+            echo 'constant("APP_ENV") !== "dev" It has did nothing';
+            exit;
+        }
+        $publicDir = Command::getPublicDir();
+        if (file_exists($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR . DIRECTORY_SEPARATOR . self::LOGS_FILE)) {
+            unlink($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR . DIRECTORY_SEPARATOR . self::LOGS_FILE);
+        }
+        if (is_dir($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR)) {
+            rmdir($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR);
+        }
+    }
+
+    /**
+     * install
+     * @return void
+     */
+    public function install()
+    {
+        if (constant('APP_ENV') !== 'dev') {
+            echo 'constant("APP_ENV") !== "dev" It has did nothing';
+            exit;
+        }
+        $publicDir = Command::getPublicDir();
+        mkdir($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR);
+        fopen($publicDir . DIRECTORY_SEPARATOR . self::LOGS_DIR . DIRECTORY_SEPARATOR . self::LOGS_FILE, "w");
     }
 }

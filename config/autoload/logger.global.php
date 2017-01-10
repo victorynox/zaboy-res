@@ -8,11 +8,15 @@
 
 use \zaboy\res\Logger\FileLogWriter;
 use \zaboy\res\Logger\FileLogWriterFactory;
+use \zaboy\installer\Command;
+use \zaboy\res\Logger\Installer as LoggerInstaller;
 
 return [
     'logWriter' => [
         FileLogWriter::class => [
-            FileLogWriterFactory::FILE_NAME_KEY => realpath('logs.txt')
+            FileLogWriterFactory::FILE_NAME_KEY =>
+                realpath(Command::getPublicDir() . DIRECTORY_SEPARATOR .
+                    LoggerInstaller::LOGS_DIR . DIRECTORY_SEPARATOR . LoggerInstaller::LOGS_FILE)
         ]
     ],
     'services' => [

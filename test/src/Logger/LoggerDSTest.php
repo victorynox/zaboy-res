@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\Test\LoggerInterfaceTest;
 use zaboy\dic\InsideConstruct;
+use zaboy\installer\Command;
 use zaboy\res\Logger\FileLogWriter;
 use zaboy\res\Logger\FileLogWriterFactory;
 use zaboy\res\Logger\Logger;

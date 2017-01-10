@@ -3,13 +3,9 @@
 chdir(dirname(__DIR__));
 
 require 'vendor/autoload.php';
+require_once 'config/env_configurator.php';
 
 use Zend\Diactoros\Server;
-use zaboy\rest\Pipe\MiddlewarePipeOptions;
-use zaboy\rest\Pipe\Factory\RestRqlFactory;
-use Zend\Stratigility\Middleware\ErrorHandler;
-use Zend\Stratigility\Middleware\NotFoundHandler;
-use Zend\Stratigility\NoopFinalHandler;
 
 // Define application environment - 'dev' or 'prop'
 if (getenv('APP_ENV') === 'dev') {
@@ -20,13 +16,9 @@ if (getenv('APP_ENV') === 'dev') {
 
 $container = include 'config/container.php';
 
-$RestRqlFactory = new RestRqlFactory();
-$rest = $RestRqlFactory($container, '');
 
-$app = new MiddlewarePipeOptions(['env' => isset($env) ? $env : null]); //['env' => 'develop']
-$app->raiseThrowables();
-$app->pipe('/api/rest', $rest);
-
-$server = Server::createServer($app, $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
+$server = Server::createServer(function () {
+    return "Hello world";
+}, $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
 
 $server->listen();

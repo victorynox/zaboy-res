@@ -1,2 +1,0 @@
-NTg3NGFlYTE1NjQxMjcuNTUwNTI1OTlfMTQ4NDAzNDY4OS4zNTMz;warning;Random message
-NTg3NGFlYTE1NjRmMDQuNTg0OTg2MzZfMTQ4NDAzNDY4OS4zNTM1;critical;Uncaught Exception!
